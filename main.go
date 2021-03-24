@@ -164,7 +164,7 @@ func DDSms(apiurl, msg string) error {
 }
 
 func main() {
-	//一次性读取112321321
+	//一次性读取
 	//直接读取文件，无需打开句柄
 
 	// ret, err := ioutil.ReadFile("/Users/tony/text.txt")
