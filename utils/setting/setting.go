@@ -34,7 +34,7 @@ func FileMonitoring(filePath string, hookfn func([]byte)) {
 		line, err := rd.ReadBytes('\n')
 		//如果是文件末尾不返回
 		if err == io.EOF {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(1000000 * time.Millisecond)
 			continue
 		} else if err != nil {
 			log.Fatalln(err)
@@ -80,7 +80,7 @@ func DDSms(apiurl, msg string) error {
 func Run() {
 
 	//日志监控
-	FileMonitoring("C:\\Users\\acer\\Documents\\1.txt", processTask)
+	FileMonitoring("/root/access.log-2021-03-23", processTask)
 	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
 }
 
