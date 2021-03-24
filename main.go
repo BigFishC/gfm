@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/valyala/fasthttp"
+	"github.com/gfm/utils/setting"
 )
 
 //一次性读取
@@ -50,12 +48,6 @@ func ReadBlock(filePath string, bufSize int, hookfn func([]byte)) error {
 }
 
 //输出到控制台
-func processTask(line []byte) {
-	// os.Stdout.Write(line)
-	if string(line[0]) == "3" {
-		DDSms("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", string(line[0]))
-	}
-}
 
 //逐行读取
 func ReadLine(filePath string, hookfn func([]byte)) error {
@@ -75,29 +67,6 @@ func ReadLine(filePath string, hookfn func([]byte)) error {
 			}
 			return err
 		}
-	}
-}
-
-//文件监控
-func FileMonitoring(filePath string, hookfn func([]byte)) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer f.Close()
-
-	rd := bufio.NewReader(f)
-	f.Seek(0, 2)
-	for {
-		line, err := rd.ReadBytes('\n')
-		//如果是文件末尾不返回
-		if err == io.EOF {
-			time.Sleep(500 * time.Millisecond)
-			continue
-		} else if err != nil {
-			log.Fatalln(err)
-		}
-		go hookfn(line)
 	}
 }
 
@@ -132,65 +101,20 @@ func SendMsg(apiurl, msg string) {
 
 }
 
-//钉钉告警fasthttp
-func DDSms(apiurl, msg string) error {
-	content := `{"msgtype": "text",
-      "text": {"content": "` + msg + `"},
-                "at": {
-                     "atMobiles": [
-                         "18204019490"
-                     ],
-                     "isAtAll": false
-                }
-    }`
-
-	req := fasthttp.AcquireRequest()
-	defer fasthttp.ReleaseRequest(req) //释放使用过的资源
-
-	//设置请求头
-	req.Header.SetContentType("application/json")
-
-	//设置请求方式
-	req.Header.SetMethod("POST")
-
-	req.SetRequestURI(apiurl)
-	reqBody := []byte(content)
-	req.SetBody(reqBody)
-
-	resp := fasthttp.AcquireResponse()
-	defer fasthttp.ReleaseResponse(resp) //释放使用过的资源
-
-	if err := fasthttp.Do(req, resp); err != nil {
-		return err
-	}
-	return nil
-}
-
 func main() {
-	//一次性读取
-	//直接读取文件，无需打开句柄
 
-	// ret, err := ioutil.ReadFile("/Users/tony/text.txt")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(ret)
-
-	//一次性读取
-	// ret, err := ReadAll("/Users/tony/text.txt")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(ret)
-
-	//分块读取
-	// ReadBlock("/Users/tony/text.txt", 10000, processTask)
-
-	//逐行读取
-	// ReadLine("/Users/tony/text.txt", processTask)
-
-	//日志监控
-	FileMonitoring("C:\\Users\\acer\\Documents\\1.txt", processTask)
-	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
-
+	args := os.Args
+	if args == nil || len(args) < 2 {
+		setting.Help()
+	} else {
+		if args[1] == "help" || args[1] == "--help" {
+			setting.Help()
+		} else if args[1] == "version" || args[1] == "--version" {
+			fmt.Println("v0.6.5")
+		} else if args[1] == "run" || args[1] == "--run" {
+			setting.Run()
+		} else {
+			setting.Help()
+		}
+	}
 }
