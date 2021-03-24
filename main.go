@@ -101,7 +101,7 @@ func FileMonitoring(filePath string, hookfn func([]byte)) {
 	}
 }
 
-//钉钉告警
+//钉钉告警http
 func SendMsg(apiurl, msg string) {
 	webhook := apiurl
 	content := `{"msgtype": "text",
@@ -132,6 +132,7 @@ func SendMsg(apiurl, msg string) {
 
 }
 
+//钉钉告警fasthttp
 func DDSms(apiurl, msg string) error {
 	content := `{"msgtype": "text",
       "text": {"content": "` + msg + `"},
