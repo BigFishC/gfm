@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 //一次性读取
@@ -51,7 +53,7 @@ func ReadBlock(filePath string, bufSize int, hookfn func([]byte)) error {
 func processTask(line []byte) {
 	// os.Stdout.Write(line)
 	if string(line[0]) == "3" {
-		SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", string(line[0]))
+		DDSms("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", string(line[0]))
 	}
 }
 
@@ -108,9 +110,9 @@ func SendMsg(apiurl, msg string) {
                      "atMobiles": [
                          "18204019490"
                      ],
-                     "isAtAll": true
+                     "isAtAll": false
                 }
-   }`
+    }`
 	//创建一个请求
 	req, err := http.NewRequest("POST", webhook, strings.NewReader(content))
 	if err != nil {
@@ -128,6 +130,37 @@ func SendMsg(apiurl, msg string) {
 	defer resp.Body.Close()
 	// body,_:=ioutil.ReadAll(resp.Body)
 
+}
+
+func DDSms(apiurl, msg string) error {
+	content := `{"msgtype": "text",
+      "text": {"content": "` + msg + `"},
+                "at": {
+                     "atMobiles": [
+                         "18204019490"
+                     ],
+                     "isAtAll": false
+                }
+    }`
+
+	req := &fasthttp.Request{}
+	req.SetRequestURI(apiurl)
+
+	reqBody := []byte(content)
+	req.SetBody(reqBody)
+
+	//设置请求头
+	req.Header.SetContentType("application/json")
+
+	//设置请求方式
+	req.Header.SetMethod("POST")
+
+	resp := &fasthttp.Response{}
+	client := &fasthttp.Client{}
+	if err := client.Do(req, resp); err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
@@ -154,7 +187,7 @@ func main() {
 	// ReadLine("/Users/tony/text.txt", processTask)
 
 	//日志监控
-	FileMonitoring("/Users/tony/test.txt", processTask)
+	FileMonitoring("C:\\Users\\acer\\Documents\\1.txt", processTask)
 	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
 
 }
