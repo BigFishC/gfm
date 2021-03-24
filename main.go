@@ -143,11 +143,8 @@ func DDSms(apiurl, msg string) error {
                 }
     }`
 
-	req := &fasthttp.Request{}
-	req.SetRequestURI(apiurl)
-
-	reqBody := []byte(content)
-	req.SetBody(reqBody)
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req) //释放使用过的资源
 
 	//设置请求头
 	req.Header.SetContentType("application/json")
@@ -155,9 +152,14 @@ func DDSms(apiurl, msg string) error {
 	//设置请求方式
 	req.Header.SetMethod("POST")
 
-	resp := &fasthttp.Response{}
-	client := &fasthttp.Client{}
-	if err := client.Do(req, resp); err != nil {
+	req.SetRequestURI(apiurl)
+	reqBody := []byte(content)
+	req.SetBody(reqBody)
+
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(resp) //释放使用过的资源
+
+	if err := fasthttp.Do(req, resp); err != nil {
 		return err
 	}
 	return nil
