@@ -10,6 +10,7 @@ import (
 
 	"github.com/gfm/core/exec"
 	"github.com/gfm/utils/color"
+	"github.com/hpcloud/tail"
 	"github.com/valyala/fasthttp"
 )
 
@@ -28,18 +29,30 @@ func FileMonitoring(filePath string, hookfn func([]byte)) {
 	}
 	defer f.Close()
 
+	bufio.NewReaderSize(f, 32768) //默认defaultVufSize=4096
 	rd := bufio.NewReader(f)
-	f.Seek(0, 2)
+	f.Seek(1, 2)
 	for {
 		line, err := rd.ReadBytes('\n')
 		//如果是文件末尾不返回
 		if err == io.EOF {
-			time.Sleep(1000000 * time.Millisecond)
+			time.Sleep(200 * time.Millisecond)
 			continue
 		} else if err != nil {
 			log.Fatalln(err)
 		}
 		go hookfn(line)
+	}
+}
+
+//文件监控2
+func FMonitor(filePath string) {
+	t, err := tail.TailFile(filePath, tail.Config{Follow: true})
+	if err != nil {
+		panic(err)
+	}
+	for line := range t.Lines {
+		fmt.Println(line.Text)
 	}
 }
 
@@ -81,6 +94,8 @@ func Run() {
 
 	//日志监控
 	FileMonitoring("/root/access.log-2021-03-23", processTask)
+	// //日志监控2
+	// FMonitor("C:\\Users\\acer\\Documents\\1.txt")
 	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
 }
 
