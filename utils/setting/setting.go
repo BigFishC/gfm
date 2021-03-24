@@ -78,27 +78,6 @@ func DDSms(apiurl, msg string) error {
 }
 
 func Run() {
-	//一次性读取
-	//直接读取文件，无需打开句柄
-
-	// ret, err := ioutil.ReadFile("/Users/tony/text.txt")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(ret)
-
-	//一次性读取
-	// ret, err := ReadAll("/Users/tony/text.txt")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// fmt.Println(ret)
-
-	//分块读取
-	// ReadBlock("/Users/tony/text.txt", 10000, processTask)
-
-	//逐行读取
-	// ReadLine("/Users/tony/text.txt", processTask)
 
 	//日志监控
 	FileMonitoring("C:\\Users\\acer\\Documents\\1.txt", processTask)
