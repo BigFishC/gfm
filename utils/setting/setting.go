@@ -12,6 +12,7 @@ import (
 	"github.com/gfm/utils/color"
 	"github.com/hpcloud/tail"
 	"github.com/valyala/fasthttp"
+	"gopkg.in/ini.v1"
 )
 
 func processTask(line []byte) {
@@ -90,10 +91,21 @@ func DDSms(apiurl, msg string) error {
 	return nil
 }
 
-func Run() {
+func Run(model string) {
+	cfg, err := ini.Load("conf.ini")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	switch {
+	case model == "debug":
+		fmt.Println("Startting send msg！")
+		FileMonitoring(cfg.Section("paths").Key("logpath").String(), processTask)
+	case model == "pro":
+		FileMonitoring(cfg.Section("paths").Key("logpath").String(), processTask)
+	default:
+		log.Fatalln("The parameter is error!")
+	}
 
-	//日志监控
-	FileMonitoring("/root/access.log-2021-03-23", processTask)
 	// //日志监控2
 	// FMonitor("C:\\Users\\acer\\Documents\\1.txt")
 	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
@@ -122,7 +134,8 @@ func Help() {
 	fmt.Println("")
 	fmt.Println(color.Yellow(" + [ ARGUMENTS ]------------------------------------------------------- +"))
 	fmt.Println("")
-	fmt.Println(color.Cyan("   run,--run"), color.White("	       Start up service"))
+	fmt.Println(color.Cyan("   run  --run"), color.White("	       Start up service"))
+	fmt.Println(color.Cyan("        -d  --debug"), color.White("	       Start up service with debug"))
 	//fmt.Println(color.Cyan("   init,--init"), color.White("		   Initialization, Wipe data"))
 	fmt.Println(color.Cyan("   version,--version"), color.White("  Gfm Version"))
 	fmt.Println(color.Cyan("   help,--help"), color.White("	       Help"))
