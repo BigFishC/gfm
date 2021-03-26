@@ -66,13 +66,33 @@ func FileMonitoring(filePath string, hookfn func([]byte)) {
 
 //文件监控2
 func FMonitor(filePath string) {
-	t, err := tail.TailFile(filePath, tail.Config{Follow: true})
+	config := tail.Config{
+		ReOpen:    true,
+		Follow:    true,
+		Location:  &tail.SeekInfo{Offset: 0, Whence: 2},
+		MustExist: false,
+		Poll:      true,
+	}
+
+	tails, err := tail.TailFile(filePath, config)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
-	for line := range t.Lines {
-		fmt.Println(line.Text)
+
+	var (
+		msg *tail.Line
+		ok  bool
+	)
+	for {
+		msg, ok = <-tails.Lines
+		if !ok {
+			fmt.Printf("tail file close reopen,fileName:%s\n", tails.Filename)
+			time.Sleep(time.Second)
+			continue
+		}
+		fmt.Println(msg.Text)
 	}
+
 }
 
 //钉钉告警fasthttp
