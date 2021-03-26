@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/bitly/go-simplejson"
 	"github.com/gfm/core/exec"
 	"github.com/gfm/utils/color"
 	"github.com/hpcloud/tail"
@@ -33,11 +34,21 @@ func GetLog(conf string) string {
 	return logpath
 }
 
-func processTask(line []byte) {
-	// os.Stdout.Write(line)
-	if string(line[0]) == "3" {
-		DDSms(GetApi("conf.ini"), string(line[0]))
+func GetStr(conf string) string {
+	cfg, err := ini.Load(conf)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	reg_str := cfg.Section("data").Key("reg_str").String()
+	return reg_str
+}
+
+func processTask(line []byte) {
+	DDSms(GetApi("conf.ini"), GetStr("conf.ini"))
+}
+
+func processTaskS(line string) {
+	DDSms(GetApi("conf.ini"), GetStr("conf.ini"))
 }
 
 //文件监控
@@ -65,7 +76,7 @@ func FileMonitoring(filePath string, hookfn func([]byte)) {
 }
 
 //文件监控2
-func FMonitor(filePath string) {
+func FMonitor(filePath string, hookfn func(string)) {
 	config := tail.Config{
 		ReOpen:    true,
 		Follow:    true,
@@ -90,7 +101,21 @@ func FMonitor(filePath string) {
 			time.Sleep(time.Second)
 			continue
 		}
-		fmt.Println(msg.Text)
+
+		// matched, _ := regexp.MatchString(GetStr("conf.ini"), filePath)
+		// if matched {
+		// 	fmt.Println("检测到故障")
+
+		// 	go hookfn(msg.Text)
+		// } else {
+		// 	fmt.Println(msg.Text)
+		// 	fmt.Println("未检测到故障")
+		// }
+		resjs, _ := simplejson.NewJson([]byte(msg.Text))
+		res, _ := resjs.Get("msg").String()
+		if res == GetStr("conf.ini") {
+			go hookfn(res)
+		}
 	}
 
 }
@@ -135,7 +160,7 @@ func Run(model string) {
 		fmt.Println("Startting send msg！")
 		FileMonitoring(GetLog("conf.ini"), processTask)
 	case model == "pro":
-		FMonitor(GetLog("conf.ini"))
+		FMonitor(GetLog("conf.ini"), processTaskS)
 	default:
 		log.Fatalln("The parameter is error!")
 	}
@@ -169,7 +194,7 @@ func Help() {
 	fmt.Println(color.Yellow(" + [ ARGUMENTS ]------------------------------------------------------- +"))
 	fmt.Println("")
 	fmt.Println(color.Cyan("   run  --run"), color.White("	       Start up service"))
-	fmt.Println(color.Cyan("        -d  --debug"), color.White("   Start up service with debug"))
+	fmt.Println(color.Cyan("        --debug"), color.White("       Start up service with debug"))
 	fmt.Println(color.Cyan("   version,--version"), color.White("  Gfm Version"))
 	fmt.Println(color.Cyan("   help,--help"), color.White("	       Help"))
 	fmt.Println("")

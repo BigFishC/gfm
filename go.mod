@@ -3,6 +3,7 @@ module github.com/gfm
 go 1.16
 
 require (
+	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.22.0
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
