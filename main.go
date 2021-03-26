@@ -10,7 +10,7 @@ import (
 func main() {
 
 	args := os.Args
-	if args == nil || len(args) <= 2 {
+	if args == nil || len(args) > 2 {
 		setting.Help()
 	} else if len(args) == 1 {
 		switch {

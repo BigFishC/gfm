@@ -15,10 +15,28 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+func GetApi(conf string) string {
+	cfg, err := ini.Load(conf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	ddapi := cfg.Section("apis").Key("ddapi").String()
+	return ddapi
+}
+
+func GetLog(conf string) string {
+	cfg, err := ini.Load(conf)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	logpath := cfg.Section("paths").Key("logpath").String()
+	return logpath
+}
+
 func processTask(line []byte) {
 	// os.Stdout.Write(line)
 	if string(line[0]) == "3" {
-		DDSms("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", string(line[0]))
+		DDSms(GetApi("conf.ini"), string(line[0]))
 	}
 }
 
@@ -92,16 +110,12 @@ func DDSms(apiurl, msg string) error {
 }
 
 func Run(model string) {
-	cfg, err := ini.Load("conf.ini")
-	if err != nil {
-		log.Fatalln(err)
-	}
 	switch {
 	case model == "debug":
 		fmt.Println("Startting send msg！")
-		FileMonitoring(cfg.Section("paths").Key("logpath").String(), processTask)
+		FileMonitoring(GetLog("conf.ini"), processTask)
 	case model == "pro":
-		FileMonitoring(cfg.Section("paths").Key("logpath").String(), processTask)
+		FMonitor(GetLog("conf.ini"))
 	default:
 		log.Fatalln("The parameter is error!")
 	}
@@ -135,8 +149,7 @@ func Help() {
 	fmt.Println(color.Yellow(" + [ ARGUMENTS ]------------------------------------------------------- +"))
 	fmt.Println("")
 	fmt.Println(color.Cyan("   run  --run"), color.White("	       Start up service"))
-	fmt.Println(color.Cyan("        -d  --debug"), color.White("	       Start up service with debug"))
-	//fmt.Println(color.Cyan("   init,--init"), color.White("		   Initialization, Wipe data"))
+	fmt.Println(color.Cyan("        -d  --debug"), color.White("   Start up service with debug"))
 	fmt.Println(color.Cyan("   version,--version"), color.White("  Gfm Version"))
 	fmt.Println(color.Cyan("   help,--help"), color.White("	       Help"))
 	fmt.Println("")
