@@ -48,7 +48,7 @@ func GetLog(conf string) string {
 	return logpath
 }
 
-func GetStr(conf string) string {
+func GetMsg(conf string) string {
 	cfg, err := ini.Load(conf)
 	if err != nil {
 		log.Fatalln(err)

@@ -17,11 +17,11 @@ import (
 )
 
 func processTask(line []byte) {
-	DDSms(fo.GetApi("conf.ini"), fo.GetStr("conf.ini"))
+	DDSms(fo.GetApi("conf.ini"), fo.GetMsg("conf.ini"))
 }
 
 func processTaskS(line string) {
-	DDSms(fo.GetApi("conf.ini"), fo.GetStr("conf.ini"))
+	DDSms(fo.GetApi("conf.ini"), fo.GetMsg("conf.ini"))
 }
 
 //文件监控
@@ -75,7 +75,7 @@ func FMonitor(filePath string, hookfn func(string)) {
 		}
 		resjs, _ := simplejson.NewJson([]byte(msg.Text))
 		res, _ := resjs.Get("msg").String()
-		if res == fo.GetStr("conf.ini") {
+		if res == fo.GetMsg("conf.ini") {
 			go hookfn(res)
 		}
 	}
@@ -84,14 +84,15 @@ func FMonitor(filePath string, hookfn func(string)) {
 
 //钉钉告警fasthttp
 func DDSms(apiurl, msg string) error {
-	content := `{"msgtype": "text",
-      "text": {"content": "` + msg + `"},
-                "at": {
-                     "atMobiles": [
-                         "18204019490"
-                     ],
-                     "isAtAll": false
-                }
+	content := `{
+	    "msgtype": "text",
+                   "text": {"content": "` + msg + `"},
+                   "at": {
+                        "atMobiles": [
+                           "18204019490"
+                        ],
+                        "isAtAll": false
+                    }
     }`
 
 	req := fasthttp.AcquireRequest()
