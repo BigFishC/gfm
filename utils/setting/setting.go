@@ -70,20 +70,9 @@ func FMonitor(filePath string, hookfn func(string)) {
 	for {
 		msg, ok = <-tails.Lines
 		if !ok {
-			fmt.Printf("tail file close reopen,fileName:%s\n", tails.Filename)
 			time.Sleep(time.Second)
 			continue
 		}
-
-		// matched, _ := regexp.MatchString(GetStr("conf.ini"), filePath)
-		// if matched {
-		// 	fmt.Println("检测到故障")
-
-		// 	go hookfn(msg.Text)
-		// } else {
-		// 	fmt.Println(msg.Text)
-		// 	fmt.Println("未检测到故障")
-		// }
 		resjs, _ := simplejson.NewJson([]byte(msg.Text))
 		res, _ := resjs.Get("msg").String()
 		if res == fo.GetStr("conf.ini") {
@@ -137,10 +126,6 @@ func Run(model string) {
 	default:
 		log.Fatalln("The parameter is error!")
 	}
-
-	// //日志监控2
-	// FMonitor("C:\\Users\\acer\\Documents\\1.txt")
-	// SendMsg("https://oapi.dingtalk.com/robot/send?access_token=bb7e54b59548045909b5042f90dd2e635f56ee9055a3b7e90cbb88821a413536", "测试")
 }
 
 func Help() {
