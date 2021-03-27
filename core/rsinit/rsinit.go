@@ -2,27 +2,20 @@ package rsinit
 
 import (
 	"log"
-	"os"
 
+	"github.com/gfm/core/fo"
 	"gopkg.in/ini.v1"
 )
 
-type Env struct {
-	Foo string `ini:"foo"`
-}
-
-func InitConfig() {
-	cfg, err := ini.Load([]byte("[env]\nfoo = ${test}\n"))
+func InitData() {
+	cfg, err := ini.Load("conf.ini")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	cfg.ValueMapper = os.ExpandEnv
-	// ...
-	env := &Env{}
-	err = cfg.Section("env").MapTo(env)
-	log.Fatalln(err)
+	cfg.Section("paths").Key("logpath").SetValue(fo.GetMainPath() + fo.GetTday() + "/" + fo.GetFileName())
+	cfg.SaveTo("conf.ini")
 }
 
 func RunInit() {
-	InitConfig()
+	InitData()
 }

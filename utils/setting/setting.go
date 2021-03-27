@@ -10,45 +10,18 @@ import (
 
 	"github.com/bitly/go-simplejson"
 	"github.com/gfm/core/exec"
+	"github.com/gfm/core/fo"
 	"github.com/gfm/utils/color"
 	"github.com/hpcloud/tail"
 	"github.com/valyala/fasthttp"
-	"gopkg.in/ini.v1"
 )
 
-func GetApi(conf string) string {
-	cfg, err := ini.Load(conf)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	ddapi := cfg.Section("apis").Key("ddapi").String()
-	return ddapi
-}
-
-func GetLog(conf string) string {
-	cfg, err := ini.Load(conf)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	logpath := cfg.Section("paths").Key("logpath").String()
-	return logpath
-}
-
-func GetStr(conf string) string {
-	cfg, err := ini.Load(conf)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	reg_str := cfg.Section("data").Key("reg_str").String()
-	return reg_str
-}
-
 func processTask(line []byte) {
-	DDSms(GetApi("conf.ini"), GetStr("conf.ini"))
+	DDSms(fo.GetApi("conf.ini"), fo.GetStr("conf.ini"))
 }
 
 func processTaskS(line string) {
-	DDSms(GetApi("conf.ini"), GetStr("conf.ini"))
+	DDSms(fo.GetApi("conf.ini"), fo.GetStr("conf.ini"))
 }
 
 //文件监控
@@ -113,7 +86,7 @@ func FMonitor(filePath string, hookfn func(string)) {
 		// }
 		resjs, _ := simplejson.NewJson([]byte(msg.Text))
 		res, _ := resjs.Get("msg").String()
-		if res == GetStr("conf.ini") {
+		if res == fo.GetStr("conf.ini") {
 			go hookfn(res)
 		}
 	}
@@ -158,9 +131,9 @@ func Run(model string) {
 	switch {
 	case model == "debug":
 		fmt.Println("Startting send msg！")
-		FileMonitoring(GetLog("conf.ini"), processTask)
+		FileMonitoring(fo.GetLog("conf.ini"), processTask)
 	case model == "pro":
-		FMonitor(GetLog("conf.ini"), processTaskS)
+		FMonitor(fo.GetLog("conf.ini"), processTaskS)
 	default:
 		log.Fatalln("The parameter is error!")
 	}
