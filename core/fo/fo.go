@@ -7,8 +7,12 @@ import (
 	"gopkg.in/ini.v1"
 )
 
+var ConfContent = struct {
+	ConfName string `json:"confname"`
+}{ConfName: "conf.ini"}
+
 func LoadConf() *ini.File {
-	cfg, err := ini.Load("conf.ini")
+	cfg, err := ini.Load(ConfContent.ConfName)
 	if err != nil {
 		log.Fatalln(err)
 	}

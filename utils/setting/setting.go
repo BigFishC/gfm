@@ -17,11 +17,11 @@ import (
 )
 
 func processTask(line []byte) {
-	DDSms(fo.GetApi("conf.ini"), fo.GetMsg("conf.ini"))
+	DDSms(fo.GetApi(fo.ConfContent.ConfName), fo.GetMsg(fo.ConfContent.ConfName))
 }
 
 func processTaskS(line string) {
-	DDSms(fo.GetApi("conf.ini"), fo.GetMsg("conf.ini"))
+	DDSms(fo.GetApi(fo.ConfContent.ConfName), fo.GetMsg(fo.ConfContent.ConfName))
 }
 
 //文件监控
@@ -75,7 +75,7 @@ func FMonitor(filePath string, hookfn func(string)) {
 		}
 		resjs, _ := simplejson.NewJson([]byte(msg.Text))
 		res, _ := resjs.Get("msg").String()
-		if res == fo.GetMsg("conf.ini") {
+		if res == fo.GetMsg(fo.ConfContent.ConfName) {
 			go hookfn(res)
 		}
 	}
@@ -121,9 +121,9 @@ func Run(model string) {
 	switch {
 	case model == "debug":
 		fmt.Println("Startting send msg！")
-		FileMonitoring(fo.GetLog("conf.ini"), processTask)
+		FileMonitoring(fo.GetLog(fo.ConfContent.ConfName), processTask)
 	case model == "pro":
-		FMonitor(fo.GetLog("conf.ini"), processTaskS)
+		FMonitor(fo.GetLog(fo.ConfContent.ConfName), processTaskS)
 	default:
 		log.Fatalln("The parameter is error!")
 	}
